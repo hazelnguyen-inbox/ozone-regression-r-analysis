@@ -1,0 +1,381 @@
+---
+title: null
+pagetitle: "Simple Linear Regression Analysis of Ozone Exceedance Days"
+author: Hazel 
+date: 01-30-2026
+output: html_document
+---
+
+<div class="page">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+<div class="menu-group">
+<a href="#s1" class="sidebar-item">Section 1: Introduction</a>
+</div>
+
+<div class="menu-group">
+<a href="#s2" class="sidebar-item">Section 2: Data Description</a>
+</div>
+
+<div class="menu-group">
+<a href="#s3" class="sidebar-item">Section 3: Exploratory Data Analysis</a>
+</div>
+
+<div class="menu-group">
+<a href="#s4" class="sidebar-item">Section 4: Simple Linear Regression Model</a>
+</div>
+
+<div class="menu-group">
+<a href="#s5" class="sidebar-item">Section 5: Statistical Inference for the Slope</a>
+</div>
+
+<div class="menu-group">
+<a href="#s6" class="sidebar-item">Section 6: Coefficient of Determination</a>
+</div>
+
+<div class="menu-group">
+<a href="#s7" class="sidebar-item">Section 7: Model Adequacy and Diagnostics</a>
+</div>
+
+<div class="menu-group">
+<a href="#s8" class="sidebar-item">Section 8: Confidence and Prediction Intervals</a>
+</div>
+
+<div class="menu-group">
+<a href="#s9" class="sidebar-item">Section 9: Discussion</a>
+</div>
+
+<div class="menu-group">
+<a href="#s10" class="sidebar-item">Section 10: Conclusions</a>
+</div>
+
+</div>
+<!-- CONTENT -->
+<div class="content">
+<div class="report-title">
+<h1>Simple Linear Regression Analysis of Ozone Exceedance Days</h1>
+</div>
+
+<!------ Sec1_Cont------>
+<div id="s1" class="section">
+<h2>Section 1: Introduction</h2>
+<p>Ground-level ozone is a major component of air pollution and poses serious risks to both public health and environmental quality. Understanding the meteorological conditions associated 
+  with elevated ozone levels is therefore an important component of air quality management and environmental policy. Statistical modeling provides a framework for quantifying these relationships and assessing how strongly atmospheric conditions influence pollution outcomes.</p>
+<p>This report investigates the relationship between the annual number of days in which ozone levels exceeded 0.20 ppm and a seasonal meteorological index defined as the average 850-millibar temperature. The ozone exceedance count serves as the response variable, while the meteorological index acts as the explanatory variable. 
+  The data were collected in the South Coast Air Basin of California and span the years 1976 through 1991.</p>
+<p>The primary purpose of this analysis is to determine whether a statistically significant linear relationship exists between the meteorological index and the number of high-ozone days. In addition, the study seeks to quantify the strength and direction of the association, evaluate whether a simple linear regression model provides an adequate description of the data, and assess the usefulness of the model for explanation and prediction.
+   All data, code, and graphical output are included to ensure full reproducibility of results.</p>
+</div> <!-- END-Sec1_Cont -->
+
+
+<!------ Sec2_Cont------>
+<div id="s2" class="section">
+<h2>Section 2: Data Description</h2>
+<p>The dataset consists of sixteen annual observations, with each row corresponding to a single calendar year. For each year, the number of days in which ozone concentrations exceeded 0.20 ppm was recorded, along with the value of a seasonal meteorological index based on upper-air temperature measurements.</p> 
+```{r create-ozone-dt }
+#import the data
+ozone_dt<- data.frame(
+  Year = 1976:1991,
+  Days = c(91,105,106,108,88,91,58,82,81,65,61,48,61,43,33,36),
+  Index = c(16.7,17.1,18.2,18.1,17.2,18.2,16.0,17.2,18.0,17.2,16.9,17.1,18.2,17.3,17.5,16.6)
+)
+ozone_dt
+```
+<p>The variable Days is quantitative and represents the response of interest, while Index is also quantitative and represents large-scale atmospheric conditions that may influence ozone formation. Because ozone chemistry is sensitive to temperature and atmospheric stability, this index is expected to be physically 
+  relevant to ozone exceedance frequency.</p>
+</div> <!-- END-Sec2_Cont -->
+
+<!------ Sec3_Cont------>
+<div id="s3" class="section">
+<h2>Section 3: Exploratory Data Analysis</h2>
+<p>Prior to formal modeling, it is important to visually assess the relationship between the two quantitative variables. A scatterplot of ozone exceedance days versus the meteorological index provides an initial indication of the form, direction, and strength of the association.</p>
+```{r ozone_dt-scatterplot}
+#create a scatterplot
+plot(ozone_dt$Index, ozone_dt$Days,
+     xlab = "Seasonal Meteorological Index (850 mb Temperature)",
+     ylab = "Number of Days Ozone > 0.20 ppm",
+     main = "Scatterplot of Ozone Exceedance Days vs. Meteorological Index",
+     pch = 10)
+```
+
+<p>The scatterplot suggests a slight positive association between the meteorological index and the number of ozone exceedance days. In general, years with higher index values tend to show more exceedance days, although the points exhibit substantial variability around any apparent trend. The relationship does not appear strongly linear, and the spread of observations indicates that additional factors likely influence ozone exceedance frequency. Nevertheless, a simple linear regression model is considered a reasonable initial approach for quantifying the observed tendency.</p>
+</div> <!-- END-Sec3_Cont -->
+
+
+<!------ Sec4_Cont------>
+<div id="s4" class="section">
+<h2>Section 4: Simple Linear Regression Model</h2>
+<p>Using the simple linear regression equation:</p>
+<p>$\text{Days} = \beta_0 + \beta_1 (\text{Index}) + \varepsilon$</p>
+<p>where $\beta_0$ is the intercept, $\beta_1$ is the slope, and $\varepsilon$ is a random error term with mean 0 and constant variance.  </p>
+```{r ozone_dt-regression}
+#create the fit a simple linear regression model with Days as the response
+fit <- lm(Days ~ Index, data = ozone_dt)
+summary(fit)
+```
+<p>The estimated slope is positive, suggesting that higher values of the meteorological index are associated with an increased number of ozone exceedance days. However, the p-value for the slope is 0.127, which is greater than the conventional significance level of 0.05. The estimated slope of approximately 15.3 indicates that, according to the fitted model, a one-unit increase in the seasonal 850-mb temperature index is associated with an average increase of about 15 additional ozone exceedance days per year. From an environmental perspective, this represents a substantial change in air quality conditions. However, because this estimated relationship is not statistically significant at the 0.05 level, this numerical effect should be interpreted cautiously and viewed as suggestive rather than conclusive evidence of a linear relationship.</p>
+</div> <!-- END-Sec4_Cont -->
+
+<!------ Sec5_Cont------>
+<div id="s5" class="section">
+<h2>Section 5: Statistical Inference for the Slope</h2>
+<p>We formally test whether the meteorological index is linearly associated with ozone exceedance days.</p>
+<p>H₀: $\beta_1$ = 0 (no linear relationship)</p>
+<p>H₁: $\beta_1$ ≠ 0 (linear relationship exists)</p>
+<p>The p-value for the slope in the regression output corresponds to this hypothesis test. In this analysis, the p-value is greater than 0.05, so we fail to reject the null hypothesis. This means there is not enough statistical evidence to conclude that a linear relationship exists between the meteorological index and the number of high-ozone days.</p>
+<p>Although the estimated slope is positive and indicates an upward trend, the relationship is not statistically significant in this dataset. It is important to note that failing to reject the null hypothesis does not prove that no relationship exists between the meteorological index and ozone exceedance days. Rather, it indicates that this dataset does not provide strong enough statistical evidence to confirm a linear association. The lack of significance may be influenced by the relatively small sample size (16 years) or by the omission of other important variables that also affect ozone formation.</p>
+</div>
+<!-- END-Sec5_Cont -->
+
+<!------ Sec6_Cont------>
+<div id="s6" class="section">
+<h2>Section 6: Coefficient of Determination</h2>
+```{r ozone_dt-sqr}
+#pull the r quared value out
+summary(fit)$r.squared
+```
+<p>The coefficient of determination, $R^2$, measures the proportion of variability in ozone exceedance days explained by the meteorological index. In this case, the value of R² is relatively small, indicating that only a modest portion of the year-to-year variation in exceedance days is explained by this single predictor. Much of the variability 
+is likely due to other environmental and atmospheric factors not included in the model.</p>
+<p>The relatively low $R^2$ value is not unexpected in an environmental setting. Ground-level ozone formation depends on a complex combination of factors, including precursor emissions, sunlight intensity, atmospheric circulation patterns, and local weather conditions. Therefore, it is reasonable that a single large-scale temperature index explains only a portion of the year-to-year variability in exceedance days.</p>
+</div> <!-- END-Sec6_Cont -->
+
+<!------ Sec7_Cont------>
+<div id="s7" class="section">
+<h2>Section 7: Model Assumptions</h2>
+<p>Linear regression relies on several assumptions, including linearity of the mean relationship, independence of errors, constant variance, and approximate normality of residuals. These assumptions are evaluated using diagnostic plots.</p>
+```{r ozone_dt-plot}
+#create the 2x2 layout to display 4 diagnostic plots
+par(mfrow = c(2,2))
+#produce standard regression diagnostic plots for the fitted model
+plot(fit)
+#reset plotting layout back to a single plot
+par(mfrow = c(1,1))
+```
+<p>The residuals versus fitted plot is used to assess the assumptions of linearity and constant variance. The points appear to be randomly scattered around zero with no clear systematic pattern, suggesting that the linearity assumption is reasonable and that the variance of the errors is approximately constant.</p>
+<p>The normal Q–Q plot is used to evaluate whether the residuals follow an approximately normal distribution. Most of the points lie close to the reference line, with only minor deviations in the tails, indicating that the normality assumption is reasonably satisfied.</p>
+<p>The scale–location plot provides another check for constant variance. The spread of the standardized residuals appears fairly consistent across the range of fitted values, offering no strong evidence of heteroscedasticity.</p>
+<p>The residuals versus leverage plot helps identify potentially influential observations. While a few points show moderate leverage, none appear to exceed Cook’s distance thresholds, suggesting that no single observation unduly influences the fitted model.</p>
+<p>One additional consideration is that the data consist of annual observations collected sequentially from 1976 to 1991 in the South Coast Air Basin, California. Because the observations are ordered in time, there is a possibility that ozone conditions in one year may be correlated with those in nearby years. This potential temporal dependence is not formally assessed in the current simple linear regression model. Future analyses could incorporate time series methods or additional diagnostics to evaluate whether autocorrelation is present in the residuals.</p>
+<p>Overall, the diagnostic plots do not indicate any serious violations of the key linear regression assumptions. Although minor departures from ideal conditions are present, they are not substantial enough to invalidate the use of the linear regression model for this analysis.</p>
+</div> <!-- END-Sec7_Cont -->
+
+<!------ Sec8_Cont------>
+<div id="s8" class="section">
+<h2>Section 8: Confidence and Prediction Intervals</h2>
+```{r ozone_dt-confi-pre}
+#create the plot with the original data points
+new_index <- data.frame(Index = seq(min(ozone_dt$Index), max(ozone_dt$Index),
+length.out = 100))
+conf_int <- predict(fit, newdata = new_index, interval = "confidence", level = 0.95)
+pred_int <- predict(fit, newdata = new_index, interval = "prediction", level = 0.95)
+plot(ozone_dt$Index, ozone_dt$Days,
+     xlab = "Seasonal Meteorological Index",
+     ylab = "Ozone Exceedance Days",
+     main = "Fitted Regression with 95% Confidence and Prediction Intervals",
+     pch = 10)
+#create the fitted regression line
+lines(new_index$Index, conf_int[,"fit"], lwd = 2)
+#create the lower bound of the 95% CI
+lines(new_index$Index, conf_int[,"lwr"], lty = 2)
+#create the upper bound of the 95% CI
+lines(new_index$Index, conf_int[,"upr"], lty = 2)
+#create the lower bound of the 95% PI
+lines(new_index$Index, pred_int[,"lwr"], lty = 3)
+#create the upper bound of the 95% PI
+lines(new_index$Index, pred_int[,"upr"], lty = 3)
+```
+<p>The confidence interval describes the uncertainty in the estimated mean number of exceedance days for all years with a given index value. In contrast, the prediction interval is used to estimate the likely range for a single future year at that same index value. Because individual years can vary substantially due to other unmeasured influences, the prediction interval is wider than the confidence interval.</p>
+</div> <!-- END-Sec8_Cont -->
+
+<!------ Sec9_Cont------>
+<div id="s9" class="section">
+<h2>Section 9: Discussion</h2>
+<p> The results suggest a possible positive association between the meteorological index and ozone exceedance frequency, with higher index values tending to correspond to more high-ozone days. However, because the relationship is not statistically significant and the model explains only a limited portion of the variability, the index alone does not provide a strong predictive tool. Meteorological conditions represent only one part of the complex set of processes that influence ozone formation. Factors such as emissions, atmospheric chemistry, and local weather patterns likely also contribute substantially to year-to-year variation in exceedance days.</p>
+<p>This analysis is based on a relatively small sample of sixteen years and includes only a single explanatory variable, which limits the ability of the model to capture the full range of influences on ozone levels. In addition, possible time trends, interactions among meteorological variables, 
+and other environmental factors were not examined. Future work could improve upon this analysis by incorporating additional predictors, exploring multiple regression models, or applying time series methods to better represent the complexity of ozone dynamics.</p>
+</div> <!-- END-Sec9_Cont -->
+
+<!------ Sec10_Cont------>
+<div id="s10" class="section">
+<h2>Section 10: Conclusion</h2>
+<p>This analysis indicates a positive but not statistically significant relationship between the seasonal meteorological index and the number of ozone exceedance days. While the fitted regression line suggests that warmer atmospheric conditions may be associated with more 
+  frequent exceedances, the statistical evidence is not strong enough to confirm a linear relationship in the population. The model provides some insight into the data but leaves a substantial amount of variability unexplained. These results highlight the importance of considering multiple meteorological and emissions-related factors when evaluating long-term ozone behavior.</p>
+</div> <!-- END-Sec10_Cont -->
+
+</div> <!-- END-CONTENT -->
+</div> <!-- END-PAGE -->
+
+#using css to create the theme and layout
+<style>
+/* ===== GLOBAL ===== */
+body {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background-color: #E5E1DD; /* Sand */
+  color: #083B4F; /* Navy text */
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* ===== PAGE LAYOUT ===== */
+.page {
+  display: flex;
+}
+
+.main-container {
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+  background-color: #083B4F; /* Navy */
+  color: white;
+  padding: 20px 12px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-item {
+  display: block;
+  text-decoration: none;
+  color: #E5E1DD; /* Sand text */
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.sidebar-item:hover {
+  background-color: #407B8C; /* Teal */
+  color: white;
+}
+
+.sidebar-item.active {
+  background-color: #A58D66; /* Gold */
+  color: white;
+}
+
+/* ===== CONTENT ===== */
+.content {
+  flex: 1;
+  padding: 50px;
+  min-width: 0;
+  background-color: #FFFFFF;
+  font-size: 18px;
+}
+
+.content p {
+  font-size: 18px;
+  line-height: 1.9;
+}
+
+/* === Limit width === */
+.content p,
+.content ul,
+.content ol,
+.content h1,
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6,
+.content table,
+.content pre,
+.content img {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ==== Headings ==== */
+.content h1 {
+  color: #083B4F;
+  border-bottom: 3px solid #A58D66;
+  padding-bottom: 10px;
+  font-size: 36px;
+}
+
+.content h2 {
+  color: #083B4F;
+  border-left: 6px solid #407B8C;
+  padding-left: 12px;
+  margin-top: 1.2em;
+  font-size: 26px;
+}
+
+/* === Paragraphs === */
+.content p {
+  text-align: justify;
+  margin: 0.6em auto;
+}
+
+/* === Code blocks === */
+pre {
+  background-color: #F7F9FA;
+  border-left: 5px solid #407B8C;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 16px;
+}
+
+code {
+  font-size: 16px;
+}
+/* Tables */
+table {
+  border-collapse: collapse;
+  background-color: #FFFFFF;
+}
+
+th {
+  background-color: #C0D5D6; /* Aqua */
+}
+
+td, th {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+}
+
+/* === Figures centered === */
+.content img,
+.content .figure {
+  display: block;
+  margin: 20px auto;
+}
+
+/* Section spacing */
+.section {
+  margin-bottom: 40px;
+}
+/* ===== CUSTOM REPORT TITLE ===== */
+.report-title {
+  max-width: 900px;
+  margin: 10px auto 20px auto;
+  font-size: 36px;
+  font-weight: 700;
+  color: #083B4F;   /* Navy */
+  padding-bottom: 8px;
+}
+
+</style>
+
+#using javascript to create the reaction 
+<script>
+const menuItems = document.querySelectorAll('.sidebar-item');
+...
+</script>
+
+
+
+
+
+
